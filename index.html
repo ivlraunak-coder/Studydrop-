@@ -981,50 +981,96 @@
      rewires every onclick attribute via addEventListener.
 ══════════════════════════════════════════ -->
 <script>
-(function() {
-  function tryBind() {
-    if (typeof window.toggleDark !== 'function' ||
-        typeof window.goToRoom   !== 'function') {
-      setTimeout(tryBind, 50);
-      return;
+// ── ROBUST ONCLICK BRIDGE ──
+// Polls until the ES module has exported all window.* functions,
+// then directly wires every button via addEventListener.
+// Also handles dark-mode knob visual sync.
+(function () {
+  var REQUIRED = ['toggleDark', 'goToRoom'];
+
+  function allReady() {
+    return REQUIRED.every(function (n) { return typeof window[n] === 'function'; });
+  }
+
+  // Safely evaluate an onclick attribute string in window scope
+  function evalOnclick(raw, el, event) {
+    try {
+      // Use Function so it runs in window scope, with `this` = element
+      var fn = new Function('event', 'element', 'with(window){' + raw + '}');
+      fn.call(el, event, el);
+    } catch (err) {
+      console.error('[onclick bridge] error running:', raw, err);
     }
-    document.querySelectorAll('[onclick]').forEach(function(el) {
+  }
+
+  function bindAll() {
+    // Wire all elements that currently have onclick attributes
+    document.querySelectorAll('[onclick]').forEach(function (el) {
       var raw = el.getAttribute('onclick');
       if (!raw) return;
-      var m = raw.match(/^(\w+)\((.*)\)$/s);
-      if (!m) return;
-      var fnName = m[1];
-      var argsStr = m[2].trim();
-      if (typeof window[fnName] !== 'function') return;
       el.removeAttribute('onclick');
-      el.addEventListener('click', function(e) {
-        try {
-          if (!argsStr) {
-            window[fnName].call(el);
-          } else {
-            var args = argsStr === 'this' ? [el]
-              : argsStr.split(',').map(function(a) {
-                  a = a.trim();
-                  if (a === 'this') return el;
-                  try { return JSON.parse(a); }
-                  catch(ex) { return a.replace(/^['"]|['"]$/g,''); }
-                });
-            window[fnName].apply(el, args);
-          }
-        } catch(err) { console.error('onclick bridge error ['+fnName+']:', err); }
+      el.addEventListener('click', function (e) {
+        evalOnclick(raw, el, e);
       });
     });
-    // Also fix onkeydown on name inputs
-    ['nameInput2'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.removeAttribute('onkeydown');
-        el.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') window.goToRoom && window.goToRoom();
+
+    // Wire onkeydown attributes similarly
+    document.querySelectorAll('[onkeydown]').forEach(function (el) {
+      var raw = el.getAttribute('onkeydown');
+      if (!raw) return;
+      el.removeAttribute('onkeydown');
+      el.addEventListener('keydown', function (e) {
+        evalOnclick(raw, el, e);
+      });
+    });
+
+    // Use MutationObserver to catch dynamically added elements (quiz options, etc.)
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          var els = node.querySelectorAll ? Array.from(node.querySelectorAll('[onclick]')) : [];
+          if (node.hasAttribute && node.hasAttribute('onclick')) els.unshift(node);
+          els.forEach(function (el) {
+            var raw = el.getAttribute('onclick');
+            if (!raw) return;
+            el.removeAttribute('onclick');
+            el.addEventListener('click', function (e) { evalOnclick(raw, el, e); });
+          });
         });
-      }
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Dark mode knob visual sync — update knob position to match current theme
+    function syncDarkKnobs() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.querySelectorAll('.dark-toggle').forEach(function (toggle) {
+        toggle.classList.toggle('active', isDark);
+      });
+    }
+
+    // Patch toggleDark to also sync knobs after every toggle
+    var _realToggleDark = window.toggleDark;
+    window.toggleDark = function () {
+      _realToggleDark.apply(this, arguments);
+      syncDarkKnobs();
+    };
+
+    // Initial knob sync in case dark mode was restored from localStorage
+    syncDarkKnobs();
+
+    // Observe theme attribute changes to keep knobs in sync
+    new MutationObserver(syncDarkKnobs).observe(document.documentElement, {
+      attributes: true, attributeFilter: ['data-theme']
     });
   }
+
+  function tryBind() {
+    if (!allReady()) { setTimeout(tryBind, 30); return; }
+    bindAll();
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', tryBind);
   } else {
