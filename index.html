@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyDrop ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- BLOBS -->
+<div class="blob-bg">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()"><img id="lightboxImg" src="" alt=""></div>
+
+<!-- BADGE UNLOCK POPUP -->
+<div class="badge-unlock-popup" id="badgePopup">
+  <div class="bup-icon" id="bupIcon">🏅</div>
+  <div class="bup-text"><strong id="bupTitle">Badge Unlocked!</strong><span id="bupDesc">You earned a new badge</span></div>
+</div>
+
+<!-- MUSHROOM COIN EARN POPUP -->
+<div class="coin-earn-popup" id="coinEarnPopup">
+  <div class="coin-earn-icon">🍄</div>
+  <div class="coin-earn-text"><strong id="coinEarnAmt">+5 🍄</strong><span id="coinEarnReason">Mushroom Coins earned!</span></div>
+</div>
+
+<!-- XP EARN POPUP -->
+<div class="xp-earn-popup" id="xpEarnPopup">
+  <div class="xp-earn-icon">⭐</div>
+  <div class="xp-earn-text"><strong id="xpEarnAmt">+10 XP</strong><span id="xpEarnReason">XP earned!</span></div>
+</div>
+
+<!-- LEVEL UP POPUP -->
+<div class="levelup-popup" id="levelupPopup">
+  <span class="lu-icon">🎉</span>
+  <div class="lu-title">Level Up!</div>
+  <div class="lu-sub">You've reached a new level!</div>
+  <div class="lu-level" id="luLevelNum">Level 2</div>
+  <div style="font-size:.75rem;color:var(--muted);margin-top:8px" id="luLevelTitle">Apprentice Scholar</div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-backdrop hidden" id="profileModal">
+  <div class="modal">
+    <div class="modal-brand"><span>✦</span> StudyDrop</div>
+    <h2>Edit Profile</h2>
+    <p class="modal-sub">Changes appear live for your room.</p>
+    <div class="pfp-row">
+      <div class="pfp-circle" onclick="document.getElementById('pfpInput').click()">
+        <div class="pfp-emoji" id="pfpEmoji">🌸</div>
+        <img id="pfpPreviewImg" src="" style="display:none" alt="pfp">
+        <div class="pfp-overlay">CHANGE</div>
+      </div>
+      <div class="pfp-info"><strong>Profile Photo</strong><span>Click to upload · max 2MB</span></div>
+      <input type="file" id="pfpInput" accept="image/*" style="display:none" onchange="onPfpChosen(this)">
+    </div>
+    <div class="fl"><label>Your Name</label><input class="fi" type="text" id="nameInput" placeholder="e.g. Raunak" maxlength="28"></div>
+    <!-- Equipped cosmetics display -->
+    <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:16px;">
+      <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Equipped Cosmetics</div>
+      <div id="equippedDisplay" style="font-size:.83rem;color:var(--muted)">No cosmetics equipped yet. Visit the Shop! 🍄</div>
+    </div>
+    <!-- XP Progress in Profile -->
+    <div style="background:linear-gradient(135deg,rgba(197,180,227,.1),rgba(232,112,138,.07));border:1.5px solid rgba(197,180,227,.3);border-radius:var(--r-sm);padding:14px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">⭐ XP & Level</div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--lavender)" id="profileLevelLabel">Level 1 · Seedling</div>
+      </div>
+      <div style="background:var(--border2);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px;">
+        <div id="profileXpBar" style="height:8px;border-radius:100px;background:linear-gradient(90deg,var(--lavender),var(--pink));transition:width .6s ease;width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--muted);font-weight:700">
+        <span id="profileXpCurrent">0 XP</span><span id="profileXpNext">Next: 100 XP</span>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveProfile()" style="width:100%;justify-content:center;border-radius:14px">Save Changes ✓</button>
+    <button class="btn btn-ghost" onclick="closeProfileModal()" style="width:100%;justify-content:center;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<!-- ONBOARD MODAL -->
+<div class="modal-backdrop" id="onboardModal">
+  <div class="modal">
+    <div style="position:absolute;top:18px;right:18px;z-index:10">
+      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" id="onboardDarkToggle">
+        <div class="dark-toggle-knob" id="onboardDarkKnob"></div>
+      </button>
+    </div>
+    <div class="modal-brand"><span>✦</span> StudyDrop</div>
+    <h2>Welcome, studier ✨</h2>
+    <p class="modal-sub">Set up your profile first — then join or create a room with friends.</p>
+    <div class="pfp-row">
+      <div class="pfp-circle" onclick="document.getElementById('pfpInput2').click()">
+        <div class="pfp-emoji" id="pfpEmoji2">🌸</div>
+        <img id="pfpPreviewImg2" src="" style="display:none" alt="pfp">
+        <div class="pfp-overlay">CHANGE</div>
+      </div>
+      <div class="pfp-info"><strong>Profile Photo</strong><span>Click to upload · max 2MB</span></div>
+      <input type="file" id="pfpInput2" accept="image/*" style="display:none" onchange="onPfpChosen2(this)">
+    </div>
+    <div class="fl"><label>Your Name</label><input class="fi" type="text" id="nameInput2" placeholder="e.g. Raunak" maxlength="28" onkeydown="if(event.key==='Enter')goToRoom()"></div>
+    <button class="btn btn-primary" onclick="goToRoom()" style="width:100%;justify-content:center;border-radius:14px">Continue →</button>
+  </div>
+</div>
+
+<!-- ROOM LOBBY -->
+<div id="roomLobby" class="hidden">
+  <div class="lobby-wrap">
+    <div style="display:flex;justify-content:center;margin-bottom:4px">
+      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode" style="margin:0 auto">
+        <div class="dark-toggle-knob" id="darkKnob"></div>
+      </button>
+    </div>
+    <div class="lobby-logo" style="margin-top:8px">study<em>drop</em> ✦</div>
+    <div class="lobby-tagline">Study together, stay accountable.</div>
+
+    <!-- My saved rooms -->
+    <div class="my-rooms-section" id="myRoomsSection" style="display:none">
+      <div class="my-rooms-label">Your Rooms</div>
+      <div class="my-rooms-list" id="myRoomsList"></div>
+      <div style="margin:8px 0 0;border-top:1px solid var(--border);padding-top:8px;"></div>
+    </div>
+
+    <div class="lobby-card">
+      <div class="lobby-card-title">✨ Create a New Room</div>
+      <div class="lobby-card-sub">Start a private room — share the code with friends.</div>
+      <div class="fl"><label>Room Name</label><input class="fi" type="text" id="newRoomName" placeholder="e.g. JEE Grind 2025" maxlength="32"></div>
+      <button class="btn btn-primary" id="createRoomBtn" onclick="createRoom()" style="width:100%;justify-content:center;border-radius:14px">Create Room →</button>
+    </div>
+
+    <div class="lobby-divider">or join existing</div>
+
+    <div class="lobby-card">
+      <div class="lobby-card-title">🔑 Join a Room</div>
+      <div class="lobby-card-sub">Enter the 6-character code your friend shared.</div>
+      <div class="fl"><label>Room Code</label><input class="fi" type="text" id="joinCodeInput" placeholder="e.g. XK92PL" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-family:'JetBrains Mono',monospace;" onkeydown="if(event.key==='Enter')joinRoom()"></div>
+      <button class="btn btn-primary" id="joinRoomBtn" onclick="joinRoom()" style="width:100%;justify-content:center;border-radius:14px">Join Room →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SWITCH ROOM PANEL -->
+<div class="switch-room-panel hidden" id="switchRoomPanel">
+  <div class="switch-panel-inner">
+    <div class="switch-panel-title">🚪 Switch Room</div>
+    <div class="switch-panel-sub">Jump between your rooms or add a new one.</div>
+    <div class="switch-rooms-list" id="switchRoomsList"></div>
+    <button class="btn btn-ghost" onclick="openAddRoomFromPanel()" style="width:100%;justify-content:center;margin-bottom:8px">+ Join / Create Another Room</button>
+    <button class="btn" onclick="closeSwitchPanel()" style="width:100%;justify-content:center;background:var(--surface2);color:var(--muted);border:1.5px solid var(--border);">Close</button>
+  </div>
+</div>
+
+<!-- ═════ MAIN APP ═════ -->
+<div class="app-wrap" id="appWrap" style="display:none">
+
+<!-- ══════════════════════════════════════════
+     MOBILE TOP HEADER (hidden on desktop)
+══════════════════════════════════════════ -->
+<div class="mobile-header" id="mobileHeader">
+  <div class="mobile-header-left">
+    <div class="mobile-logo">study<em>drop</em> ✦</div>
+  </div>
+  <div class="mobile-header-right">
+    <div class="mobile-room-pill" onclick="openSwitchPanel()">
+      <div class="live-dot"></div>
+      <span id="mobileRoomName">Room</span>
+    </div>
+    <div class="mobile-coin" onclick="switchTab('shop',null)">
+      🍄 <span id="mobileCoinDisplay">0</span>
+    </div>
+    <div class="mobile-avatar" id="mobileAvatar" onclick="openProfileModal()">
+      <span id="mobileChipInitial">?</span>
+    </div>
+    <button class="dark-toggle" onclick="toggleDark()" id="mobileHeaderDarkToggle" style="flex-shrink:0">
+      <div class="dark-toggle-knob" id="mobileHeaderDarkKnob"></div>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DESKTOP SIDEBAR (hidden on mobile)
+══════════════════════════════════════════ -->
+<nav class="sidebar" id="appSidebar">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="logo">
+      study<em>drop</em> <span style="font-size:.65rem;font-style:normal;opacity:.6">✦</span>
+      <button class="dark-toggle" onclick="toggleDark()" style="flex-shrink:0">
+        <div class="dark-toggle-knob" id="headerDarkKnob"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar-scroll">
+    <!-- User card -->
+    <div class="sidebar-user">
+      <div class="sidebar-user-card" onclick="openProfileModal()">
+        <div class="chip-av" id="chipAv"><span id="chipInitial">?</span></div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="chipName">You</div>
+          <div class="sidebar-user-sub">Edit profile →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room + online -->
+    <div class="sidebar-meta">
+      <div class="room-pill" id="roomPill" onclick="openSwitchPanel()">
+        <div class="live-dot"></div>
+        <span class="room-name-text" id="headerRoomName">Room</span>
+      </div>
+      <div class="online-mini" id="onlinePill">
+        <div class="live-dot"></div><span id="onlineText">...</span>
+      </div>
+    </div>
+
+    <!-- Coins + XP -->
+    <div class="sidebar-stats">
+      <div class="coin-chip" onclick="switchTab('shop',document.querySelector('[data-tab=shop]'))" title="Mushroom Coins">
+        <span class="coin-icon">🍄</span><span id="coinDisplay">0</span>
+      </div>
+      <div class="xp-bar-wrap" onclick="switchTab('community',document.querySelector('[onclick*=community]'))" title="XP & Level">
+        <div class="xp-level-text" id="headerLevelText">LVL 1</div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="headerXpBar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Study</div>
+      <button class="tab-btn active" onclick="switchTab('goals',this)">📌 Goals <span class="badge" id="goalCount">0</span></button>
+      <button class="tab-btn" onclick="switchTab('chat',this)">💬 Room Chat</button>
+      <button class="tab-btn" onclick="switchTab('tracker',this)">📊 Tracker</button>
+      <button class="tab-btn" onclick="switchTab('pomodoro',this)">🍅 Pomodoro</button>
+      <button class="tab-btn" onclick="switchTab('planner',this)">📅 Planner</button>
+      <button class="tab-btn" onclick="switchTab('flashcards',this)">🃏 Flashcards</button>
+      <button class="tab-btn" onclick="switchTab('quiz',this)">🧠 Quiz</button>
+
+      <div class="sidebar-section-label" style="margin-top:6px">AI</div>
+      <button class="tab-btn" onclick="switchTab('aichat',this)">🤖 AI Tutor</button>
+      <button class="tab-btn" onclick="switchTab('aiinsights',this)">✨ AI Insights</button>
+
+      <div class="sidebar-section-label" style="margin-top:6px">Progress</div>
+      <button class="tab-btn" onclick="switchTab('missions',this)">⚡ Missions <span class="badge" id="missionBadge">!</span></button>
+      <button class="tab-btn" onclick="switchTab('report',this)">📈 Report</button>
+      <button class="tab-btn" onclick="switchTab('community',this)">🏆 Leaderboard</button>
+      <button class="tab-btn" onclick="switchTab('rewards',this)">🎖 Rewards</button>
+      <button class="tab-btn" data-tab="shop" onclick="switchTab('shop',this)">🍄 Shop</button>
+      <button class="tab-btn" onclick="switchTab('pet',this)">🐾 My Pet</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <button class="ai-setup-btn" onclick="openApiKeyModal()" id="aiKeyTab">
+      🔑 AI Setup <span style="font-size:.72rem;opacity:.7;margin-left:auto">Free</span>
+    </button>
+  </div>
+</nav>
+
+<!-- LEGACY TABS BAR (hidden – kept so any JS referencing .tabs-bar doesn't crash) -->
+<div class="tabs-bar" style="display:none!important">
+  <button class="tab-btn" onclick="switchTab('goals',this)">📌 Goals</button>
+  <button class="tab-btn" onclick="switchTab('community',this)">🏆 Leaderboard</button>
+  <button class="tab-btn" onclick="switchTab('rewards',this)">🎖 Rewards</button>
+  <button class="tab-btn" data-tab="shop" onclick="switchTab('shop',this)">🍄 Shop</button>
+  <button class="tab-btn" onclick="switchTab('missions',this)">⚡ Missions</button>
+  <button class="tab-btn" onclick="switchTab('planner',this)">📅 Planner</button>
+  <button class="tab-btn" onclick="switchTab('report',this)">📈 Report</button>
+  <button class="tab-btn" onclick="switchTab('pomodoro',this)">🍅 Pomodoro</button>
+  <button class="tab-btn" onclick="switchTab('tracker',this)">📊 My Tracker</button>
+  <button class="tab-btn" onclick="switchTab('pet',this)">🐾 My Pet</button>
+  <button class="tab-btn" onclick="switchTab('aichat',this)">🤖 AI Tutor</button>
+  <button class="tab-btn" onclick="switchTab('aiinsights',this)">✨ AI Insights</button>
+  <button class="tab-btn" onclick="switchTab('flashcards',this)">🃏 Flashcards</button>
+  <button class="tab-btn" onclick="switchTab('quiz',this)">🧠 Quiz</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════════ -->
+<div class="main-content">
+
+<!-- GOALS PAGE -->
+<div class="page active" id="page-goals">
+  <div class="goals-layout">
+    <div class="goals-col">
+
+      <!-- QUICK STATS BANNER (new feature) -->
+      <div id="quickStatsBanner" style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:90px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;box-shadow:var(--sh);text-align:center;cursor:pointer" onclick="switchTab('tracker',null)">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--pink)" id="quickTotalHrs">0m</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Studied</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;box-shadow:var(--sh);text-align:center;cursor:pointer" onclick="switchTab('pomodoro',null)">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--peach)" id="quickPomos">🍅 0</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Pomodoros</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;box-shadow:var(--sh);text-align:center;cursor:pointer" onclick="switchTab('missions',null)">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--gold)" id="quickStreak">🔥 0</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Day Streak</div>
+        </div>
+        <div style="flex:1;min-width:90px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;box-shadow:var(--sh);text-align:center;cursor:pointer" onclick="switchTab('community',null)">
+          <div style="font-size:1.3rem;font-weight:800;color:var(--lavender)" id="quickXp">⭐ 0</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">XP</div>
+        </div>
+      </div>
+
+      <!-- MOTIVATIONAL QUOTE WIDGET (new feature) -->
+      <div id="motivQuoteCard" style="background:var(--grad);border-radius:var(--r-sm);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .2s;" onclick="rotateMotivQuote()" title="Click for a new quote">
+        <div style="font-size:1.3rem;flex-shrink:0">✨</div>
+        <div style="flex:1;">
+          <div id="motivQuoteText" style="font-size:.82rem;font-weight:600;color:white;line-height:1.5;font-style:italic;">"The secret of getting ahead is getting started."</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.75);margin-top:3px;">Tap for a new quote</div>
+        </div>
+      </div>
+
+      <!-- TODAY'S MISSIONS MINI WIDGET (new feature) -->
+      <div id="todayMissionsWidget" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px 16px;margin-bottom:14px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s;" onclick="switchTab('missions',null)" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:1.3rem">⚡</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:.82rem;color:var(--text);">Daily Missions</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:1px" id="todayMissionsText">Loading…</div>
+        </div>
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted);">View →</div>
+      </div>
+
+      <div class="post-card">
+        <div class="post-header">
+          <div id="postAvatar" style="width:42px;height:42px;border-radius:50%;background:var(--pink3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🌸</div>
+          <div style="flex:1"><div class="post-name" id="postName">You</div><div class="post-sub">What's your goal today? ✨</div></div>
+          <button onclick="switchTab('pomodoro',null)" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:100px;padding:5px 11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;gap:4px;" onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">🍅 Pomo</button>
+        </div>
+        <textarea class="goal-ta" id="goalText" placeholder="Be specific — 'Finish Chapter 4 Biology + review notes for 2h' 🎯" rows="3"></textarea>
+        <div class="post-actions">
+          <label class="file-btn">🖼 Photo / File<input type="file" id="goalFile" accept="image/*,application/pdf,.doc,.docx" onchange="onGoalFileChosen(this)"></label>
+          <div id="goalFileChip" style="display:none"></div>
+          <button class="btn btn-primary btn-sm" onclick="postGoal()" style="margin-left:auto">Drop Goal →</button>
+        </div>
+      </div>
+      <div class="section-head">
+        <div class="section-title">Room Goals Feed</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <button onclick="switchTab('chat',document.getElementById('mob-chat'))" style="display:flex;align-items:center;gap:4px;background:var(--white);color:var(--rose);border:1.5px solid var(--border);border-radius:100px;padding:5px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--border)'">💬 Chat</button>
+          <button onclick="switchTab('tracker',null)" style="display:flex;align-items:center;gap:4px;background:var(--grad);color:white;border:none;border-radius:100px;padding:5px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(232,112,138,.3);transition:all .2s">⏱ Study</button>
+        </div>
+      </div>
+      <!-- ROOM INFO BAR (new feature) -->
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;box-shadow:var(--sh);flex-wrap:wrap;">
+        <div class="live-dot"></div>
+        <span style="font-size:.72rem;font-weight:700;color:var(--text2);">Room:</span>
+        <span style="font-family:'Playfair Display',serif;font-size:.82rem;font-weight:700;font-style:italic;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="roomInfoName">—</span>
+        <button onclick="navigator.clipboard.writeText(currentRoomId||'').then(()=>showToast('Code copied! 📋'))" style="background:var(--pink3);color:var(--rose);border:1px solid rgba(232,112,138,.2);border-radius:100px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s;flex-shrink:0;" id="roomInfoCode">XXXXXX</button>
+        <span style="font-size:.7rem;color:var(--muted);" id="roomInfoOnline">...</span>
+      </div>
+
+      <!-- STUDYING NOW -->
+      <div class="studying-now-section" id="studyingNowSection">
+        <div class="studying-now-title"><span style="width:7px;height:7px;border-radius:50%;background:var(--sage);display:inline-block;animation:livepulse 2s infinite"></span>Studying Right Now</div>
+        <div class="studying-now-list" id="studyingNowList"><div class="studying-now-empty">No one is actively studying yet — start the tracker! 📖</div></div>
+      </div>
+      <!-- QUICK NOTES (new feature) -->
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:18px;box-shadow:var(--sh);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;">📝 Quick Notes</div>
+          <button onclick="saveQuickNotes()" style="background:var(--grad);color:white;border:none;border-radius:100px;padding:5px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;">Save</button>
+        </div>
+        <textarea id="quickNotesArea" style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;padding:11px 14px;outline:none;resize:vertical;min-height:80px;transition:border-color .2s;line-height:1.6;" placeholder="Jot down anything — formulas, reminders, ideas…" onfocus="this.style.borderColor='var(--pink)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+
+      <div class="goal-feed" id="goalFeed">
+        <div class="empty-feed"><div class="ei">🌸</div><p>No goals yet.<br>Be the first to drop yours!</p></div>
+      </div>
+    </div>
+
+    <div class="chat-col">
+      <div class="chat-top">
+        <div class="chat-title">Room Chat</div>
+        <div class="online-badge"><div class="live-dot"></div><span id="onlineCountChat">...</span></div>
+      </div>
+      <div class="chat-msgs" id="chatMsgs"><div class="sys-note">Room chat — only members see this 🔒</div></div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chatInput" rows="1" placeholder="Say something…" onkeydown="chatEnter(event)"></textarea>
+        <button class="send-btn" onclick="sendChat()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEDICATED CHAT PAGE -->
+<div class="page" id="page-chat">
+  <div style="display:flex;flex-direction:column;height:calc(100vh - 54px);max-width:860px;margin:0 auto;background:var(--white);border-left:1px solid var(--border);border-right:1px solid var(--border);">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--white);flex-shrink:0;">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;font-style:italic;color:var(--text);">💬 Room Chat</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:1px;">Only your room members see this 🔒</div>
+      </div>
+      <div class="online-badge"><div class="live-dot"></div><span id="onlineCountChatTab">...</span></div>
+    </div>
+    <div class="chat-msgs" id="chatMsgsTab" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:7px;">
+      <div class="sys-note">Room chat — only members see this 🔒</div>
+    </div>
+    <div class="chat-input-area" style="flex-shrink:0;">
+      <textarea class="chat-input" id="chatInputTab" rows="1" placeholder="Say something…" onkeydown="chatEnterTab(event)"></textarea>
+      <button class="send-btn" onclick="sendChatTab()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="page" id="page-community">
+  <div class="community-page">
+    <h1>🏆 Room Leaderboard</h1>
+    <p class="community-sub">Your room's top studiers — updated live.</p>
+    <!-- Studying Now on Leaderboard -->
+    <div class="studying-now-section" id="studyingNowSectionLB" style="margin-bottom:20px">
+      <div class="studying-now-title"><span style="width:7px;height:7px;border-radius:50%;background:var(--sage);display:inline-block;animation:livepulse 2s infinite"></span>Studying Right Now</div>
+      <div class="studying-now-list" id="studyingNowListLB"><div class="studying-now-empty">No one is actively studying yet. 📖</div></div>
+    </div>
+    <div class="lb-grid" id="leaderboardGrid"><div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Loading...</div></div>
+  </div>
+  <div class="credit">Made with 💗 by <strong>Raunak</strong> · built with <a href="https://claude.ai" target="_blank">Claude AI ✦</a></div>
+</div>
+
+<!-- REWARDS -->
+<div class="page" id="page-rewards">
+  <div class="rewards-page">
+    <h1>🎖 Your Rewards</h1>
+    <p class="rewards-sub">Earn badges by studying hard. They show on the leaderboard! Also visit the 🍄 Shop to buy profile cosmetics.</p>
+    <div style="font-size:.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Your Badges</div>
+    <div class="my-badges-row" id="myBadgesRow"><div style="color:var(--muted);font-size:.85rem">Study to earn badges! 🌸</div></div>
+    <div style="font-size:.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;margin-top:8px;">All Badges</div>
+    <div class="all-badges-grid" id="allBadgesGrid"></div>
+  </div>
+</div>
+
+<!-- SHOP PAGE -->
+<div class="page" id="page-shop">
+  <div class="shop-page">
+    <h1>🍄 Mushroom Shop</h1>
+    <p class="shop-sub">Earn Mushroom Coins by studying. Spend them on themes, profile badges &amp; titles!</p>
+
+    <!-- Balance Banner -->
+    <div class="shop-balance-banner">
+      <div class="shop-balance-icon">🍄</div>
+      <div class="shop-balance-text">
+        <strong id="shopCoinBalance">0</strong>
+        <span>Mushroom Coins</span>
+      </div>
+      <div class="shop-earn-hint">
+        <strong>How to earn 🍄</strong>
+        1 coin per minute studied (Tracker)<br>
+        25 coins per Pomodoro session<br>
+        5 coins per goal posted
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="shop-tabs">
+      <button class="shop-tab active" onclick="filterShop('all',this)">All Items</button>
+      <button class="shop-tab" onclick="filterShop('theme',this)">🎨 Themes</button>
+      <button class="shop-tab" onclick="filterShop('badge',this)">🏅 Profile Badges</button>
+      <button class="shop-tab" onclick="filterShop('title',this)">👑 Titles</button>
+    </div>
+
+    <div class="shop-grid" id="shopGrid"></div>
+  </div>
+</div>
+
+<!-- POMODORO -->
+<div class="page" id="page-pomodoro">
+  <div class="pomo-page">
+    <div class="pomo-card">
+      <div class="pomo-mode-tabs">
+        <button class="pomo-mode-btn active" onclick="setPomoMode('focus',this)">Focus</button>
+        <button class="pomo-mode-btn" onclick="setPomoMode('short',this)">Short Break</button>
+        <button class="pomo-mode-btn" onclick="setPomoMode('long',this)">Long Break</button>
+      </div>
+      <div class="pomo-ring-wrap">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          <defs><linearGradient id="pomoPink" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e8708a"/><stop offset="100%" stop-color="#f2a98a"/></linearGradient></defs>
+          <circle class="ring-bg" cx="110" cy="110" r="96"/>
+          <circle class="ring-prog focus" id="pomoRing" cx="110" cy="110" r="96" stroke-dasharray="603" stroke-dashoffset="0"/>
+        </svg>
+        <div class="pomo-time-overlay">
+          <div class="pomo-time" id="pomoTime">25:00</div>
+          <div class="pomo-label" id="pomoLabel">FOCUS</div>
+          <div class="pomo-coin-info" id="pomoCoinPreview">🍄 +25 on finish</div>
+        </div>
+        <div class="pomo-particles"><div class="particle" id="p1"></div><div class="particle" id="p2"></div><div class="particle" id="p3"></div></div>
+        <div class="confetti-container" id="confettiContainer"></div>
+      </div>
+      <div class="pomo-controls">
+        <button class="pomo-btn pomo-reset" onclick="resetPomo()">↺ Reset</button>
+        <button class="pomo-btn pomo-start" id="pomoStartBtn" onclick="togglePomo()">▶ Start</button>
+        <button class="pomo-btn pomo-reset" id="focusModeBtn" onclick="toggleFocusMode()" title="Hide everything except timer" style="font-size:.8rem">🎯</button>
+      </div>
+      <div class="pomo-stats-row">
+        <div class="pomo-stat"><div class="pomo-stat-val" id="pomoSessions">0</div><div class="pomo-stat-lbl">Sessions</div></div>
+        <div class="pomo-stat"><div class="pomo-stat-val" id="pomoFocusMin">0</div><div class="pomo-stat-lbl">Min Focused</div></div>
+        <div class="pomo-stat" style="cursor:pointer" onclick="resetStreak()"><div class="pomo-stat-val" id="pomoStreak">🔥 0</div><div class="pomo-stat-lbl">Day Streak</div></div>
+      </div>
+    </div>
+    <div class="spotify-card">
+      <div class="spotify-header"><span class="spotify-icon">🎵</span><div><div class="spotify-title">Study Music</div><div class="spotify-sub">Pick a playlist · plays right here</div></div></div>
+      <div class="spotify-playlists">
+        <a class="sp-playlist" href="#" onclick="loadPlaylist('37i9dQZF1DX8NTLI2TtZa6','Lo-Fi Beats');return false;"><span>🌙</span> Lo-Fi Beats</a>
+        <a class="sp-playlist" href="#" onclick="loadPlaylist('37i9dQZF1DWZeKCadgRdKQ','Deep Focus');return false;"><span>🎯</span> Deep Focus</a>
+        <a class="sp-playlist" href="#" onclick="loadPlaylist('37i9dQZF1DX4sWSpwq3LiO','Peaceful Piano');return false;"><span>🎹</span> Peaceful Piano</a>
+        <a class="sp-playlist" href="#" onclick="loadPlaylist('37i9dQZF1DX3Ogo9pFvBkY','All Night Study');return false;"><span>📚</span> All Night Study</a>
+      </div>
+      <div class="spotify-embed-wrap"><iframe id="spotifyEmbed" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX8NTLI2TtZa6?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe></div>
+      <div class="sp-custom-row"><input class="sp-custom-input" type="text" id="spCustomInput" placeholder="Paste Spotify URL…"><button class="btn btn-primary btn-sm" onclick="loadCustomSpotify()">Load</button></div>
+    </div>
+    <div class="pomo-settings">
+      <div class="settings-title">⏱ Timer Settings (minutes)</div>
+      <div class="settings-grid">
+        <div class="setting-item"><label>Focus</label><input type="number" id="setFocus" value="25" min="1" max="90" onchange="applySettings()"></div>
+        <div class="setting-item"><label>Short Break</label><input type="number" id="setShort" value="5" min="1" max="30" onchange="applySettings()"></div>
+        <div class="setting-item"><label>Long Break</label><input type="number" id="setLong" value="15" min="1" max="60" onchange="applySettings()"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSIONS PAGE -->
+<div class="page" id="page-missions">
+  <div class="missions-page">
+    <div class="missions-header-row">
+      <div>
+        <h1>⚡ Daily Missions</h1>
+        <p class="missions-sub">Complete missions to earn bonus Mushroom Coins! Resets daily at midnight.</p>
+      </div>
+      <div class="missions-reset-info" id="missionResetTimer">Resets in: --:--:--</div>
+    </div>
+    <div class="mission-streak-banner">
+      <div class="mission-streak-icon">🔥</div>
+      <div class="mission-streak-text">
+        <strong id="missionStreakVal">0-Day Mission Streak</strong>
+        <span>Complete all daily missions to grow your streak!</span>
+      </div>
+    </div>
+    <div class="mission-section-title">Daily Missions</div>
+    <div class="missions-grid" id="dailyMissionsGrid"></div>
+    <div class="mission-section-title" style="margin-top:8px">Weekly Challenges</div>
+    <div class="missions-grid" id="weeklyMissionsGrid"></div>
+  </div>
+</div>
+
+<!-- PLANNER PAGE -->
+<div class="page" id="page-planner">
+  <div class="planner-page">
+    <div class="planner-controls">
+      <div>
+        <h1>📅 Study Planner</h1>
+        <p class="planner-sub">Plan your study sessions for the whole month or year.</p>
+      </div>
+      <button class="planner-mode-btn active" id="plannerMonthBtn" onclick="setPlannerMode('month',this)">📆 Month</button>
+      <button class="planner-mode-btn" id="plannerYearBtn" onclick="setPlannerMode('year',this)">🗓 Year</button>
+      <div class="planner-nav">
+        <button class="planner-nav-btn" onclick="plannerNav(-1)">‹</button>
+        <div class="planner-month-label" id="plannerLabel">April 2026</div>
+        <button class="planner-nav-btn" onclick="plannerNav(1)">›</button>
+      </div>
+    </div>
+    <div id="plannerGrid"></div>
+  </div>
+</div>
+
+<!-- PLANNER DAY MODAL -->
+<div class="modal-backdrop hidden" id="plannerDayModal">
+  <div class="planner-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--text)" id="plannerDayTitle">Monday, April 1</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:2px" id="plannerDayStudied"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closePlannerModal()">✕ Close</button>
+    </div>
+    <div id="plannerDayStudyInfo" style="display:none" class="planner-day-study-info"></div>
+    <div class="planner-task-list" id="plannerTaskList"></div>
+    <div class="planner-add-task-row">
+      <input class="planner-task-input" id="plannerTaskInput" placeholder="Add a task… e.g. Read Chapter 5 Physics" onkeydown="if(event.key==='Enter')addPlannerTask()">
+      <button class="btn btn-primary btn-sm" onclick="addPlannerTask()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY REPORT PAGE -->
+<div class="page" id="page-report">
+  <div class="report-page">
+    <div class="report-week-nav">
+      <button class="report-nav-btn" onclick="reportNav(-1)">‹</button>
+      <div class="report-week-label" id="reportWeekLabel">This Week</div>
+      <button class="report-nav-btn" onclick="reportNav(1)">›</button>
+    </div>
+    <h1>📈 Weekly Report</h1>
+    <p class="report-sub">Your study performance at a glance — graphs, insights, and subject breakdown.</p>
+    <div class="report-stats-grid">
+      <div class="report-stat-card"><div class="report-stat-val" id="rTotalHrs">0h</div><div class="report-stat-lbl">Total Studied</div></div>
+      <div class="report-stat-card"><div class="report-stat-val" id="rDailyAvg">0h</div><div class="report-stat-lbl">Daily Average</div></div>
+      <div class="report-stat-card"><div class="report-stat-val" id="rBestDay">—</div><div class="report-stat-lbl">Best Day</div></div>
+      <div class="report-stat-card"><div class="report-stat-val" id="rPomos">0</div><div class="report-stat-lbl">Pomodoros</div></div>
+      <div class="report-stat-card"><div class="report-stat-val" id="rStreak">🔥0</div><div class="report-stat-lbl">Day Streak</div></div>
+      <div class="report-stat-card"><div class="report-stat-val" id="rMissions">0/0</div><div class="report-stat-lbl">Missions Done</div></div>
+    </div>
+    <div class="report-chart-card">
+      <div class="report-chart-title">📊 Daily Study Hours This Week</div>
+      <div class="bar-chart" id="reportBarChart"></div>
+    </div>
+    <div class="report-chart-card">
+      <div class="report-chart-title">📚 Subject Breakdown</div>
+      <div class="subject-breakdown" id="reportSubjectBreakdown"><div style="color:var(--muted);font-size:.85rem">No subjects tracked yet.</div></div>
+    </div>
+    <div class="report-insight-card" id="reportInsightCard">
+      <h3>✨ Weekly Insights</h3>
+      <div id="reportInsights"></div>
+    </div>
+    <div class="report-goal-score">
+      <div class="score-num" id="reportScore">—</div>
+      <div class="score-lbl">Weekly Study Score</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:6px">Based on hours, consistency, and missions</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER -->
+<div class="page" id="page-tracker">
+  <div class="tracker-page">
+    <div class="tracker-title">My Study Tracker</div>
+    <div class="tracker-sub">Tap a subject to start/stop a live timer · <span style="color:var(--mushroom);font-weight:700">🍄 Earn 1 coin per minute studied!</span></div>
+    <div class="total-stat-row">
+      <div class="total-stat-card"><div class="val" id="totalHrsVal">0m</div><div class="lbl">Total Studied</div></div>
+      <div class="total-stat-card"><div class="val" id="totalSubjectsVal">0</div><div class="lbl">Subjects</div></div>
+      <div class="total-stat-card"><div class="val" id="topSubjectVal">—</div><div class="lbl">Top Subject</div></div>
+    </div>
+    <!-- Active Timer Banner -->
+    <div id="activeTimerBanner" style="display:none;background:var(--grad);color:white;border-radius:var(--r);padding:16px 22px;margin-bottom:18px;align-items:center;gap:14px;box-shadow:0 4px 18px rgba(232,112,138,.3);animation:fadeUp .3s ease">
+      <div style="font-size:1.5rem" id="activeTimerIcon">📖</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:.95rem" id="activeTimerSubject">Physics</div>
+        <div style="font-size:.78rem;opacity:.85">Timer running — tap subject again to stop</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;letter-spacing:1px" id="activeTimerDisplay">00:00</div>
+      <button onclick="stopActiveTimer()" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:100px;padding:7px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;color:white;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.35)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">⏹ Stop &amp; Save</button>
+    </div>
+    <!-- Pomodoro Subject Selector -->
+    <div id="pomoSubjectSelector" style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:18px;box-shadow:var(--sh)">
+      <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">🍅 Link Subject to Pomodoro</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="pomoSubjectSelect" style="flex:1;min-width:150px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-xs);padding:9px 12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;cursor:pointer">
+          <option value="">— No subject linked —</option>
+        </select>
+        <button onclick="switchTab('pomodoro',document.querySelector('[onclick*=pomodoro]'))" class="btn btn-primary btn-sm">Go to Pomodoro 🍅</button>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:8px" id="pomoLinkStatus">Select a subject above — when a Pomodoro focus session finishes, it logs time to that subject automatically.</div>
+    </div>
+    <div class="add-subject-form">
+      <div class="fg"><label>Subject Name</label><input type="text" id="subjectName" placeholder="e.g. Physics" maxlength="30" onkeydown="if(event.key==='Enter')addSubject()"></div>
+      <div class="fg"><label>Colour</label><div class="color-picker-row" id="colorPicker"></div></div>
+      <button class="btn btn-primary btn-sm" onclick="addSubject()" style="flex-shrink:0">+ Add Subject</button>
+    </div>
+    <div class="subjects-grid" id="subjectsGrid"><div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:.85rem">No subjects yet!</div></div>
+  </div>
+</div>
+
+<!-- PET PAGE -->
+<div class="page" id="page-pet">
+  <div class="tracker-page" style="max-width:700px;margin:0 auto">
+    <!-- AVATAR BUILDER -->
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:20px;box-shadow:var(--sh)">
+      <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">🎨 Your Study Avatar</div>
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div id="avatarDisplay" style="width:80px;height:80px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:2.4rem;box-shadow:0 4px 18px rgba(232,112,138,.35);flex-shrink:0;cursor:pointer;transition:transform .2s" onclick="cycleAvatar()" title="Click to change!">🌸</div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-weight:800;font-size:1rem;margin-bottom:4px;color:var(--text)" id="avatarName">Pick your vibe</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Click the avatar to cycle through styles, or pick below.</div>
+          <div id="avatarPickerRow" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Avatar Background</div>
+        <div id="avatarBgRow" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+
+    <!-- STUDY PET -->
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:var(--sh)">
+      <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🐾 Your Study Pet</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:20px">Study to feed and evolve your pet! It grows with your total hours.</div>
+
+      <!-- Pet Display -->
+      <div style="text-align:center;padding:30px 0 20px">
+        <div id="petBubble" style="display:inline-block;position:relative">
+          <div id="petEmoji" style="font-size:5rem;line-height:1;animation:petBob 2.5s ease-in-out infinite;display:inline-block">🥚</div>
+          <div id="petMood" style="position:absolute;top:-10px;right:-14px;font-size:1.4rem;animation:petBob 2s ease-in-out infinite reverse">💤</div>
+        </div>
+        <div id="petName" style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-top:14px;color:var(--text)">Studdy</div>
+        <div id="petStage" style="font-size:.78rem;color:var(--muted);margin-top:4px">Egg · Waiting to hatch…</div>
+        <div id="petMsg" style="font-size:.85rem;color:var(--pink);font-weight:700;margin-top:10px;background:var(--pink3);border-radius:100px;padding:8px 20px;display:inline-block">Start studying to hatch me! 🌱</div>
+      </div>
+
+      <!-- Happiness / Hunger bars -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">💛 Happiness</span><span id="petHappyVal" style="font-size:.72rem;font-weight:800;color:var(--gold)">0%</span></div>
+          <div style="background:var(--border2);border-radius:100px;height:8px;overflow:hidden"><div id="petHappyBar" style="height:8px;border-radius:100px;background:linear-gradient(90deg,var(--gold),#f4c88a);transition:width .6s ease;width:0%"></div></div>
+        </div>
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:14px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">🌱 Growth</span><span id="petGrowthVal" style="font-size:.72rem;font-weight:800;color:var(--sage)">0%</span></div>
+          <div style="background:var(--border2);border-radius:100px;height:8px;overflow:hidden"><div id="petGrowthBar" style="height:8px;border-radius:100px;background:linear-gradient(90deg,var(--sage),#6da861);transition:width .6s ease;width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Pet evolution stages -->
+      <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:16px">
+        <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Evolution Stages</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px" id="petEvolutionRow"></div>
+      </div>
+
+      <!-- Pet name customiser -->
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="petNameInput" class="fi" type="text" placeholder="Name your pet…" maxlength="18" style="flex:1" onkeydown="if(event.key==='Enter')savePetName()">
+        <button class="btn btn-primary btn-sm" onclick="savePetName()">Rename 🐾</button>
+      </div>
+
+      <!-- Pet species picker -->
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Choose Pet Species</div>
+        <div id="petSpeciesRow" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-content -->
+</div><!-- end appWrap -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+
+<!-- MAIN APP SCRIPT -->
+<script type="module" src="app.js"></script>
+
+
+<!-- ══════════════════ AI CHAT CSS ══════════════════ -->
+
+<!-- ══════ AI CHAT PAGE ══════ -->
+<div class="page" id="page-aichat">
+  <div class="aichat-page">
+    <div class="aichat-header">
+      <div>
+        <div class="aichat-title">🤖 AI Study Tutor</div>
+        <div class="aichat-sub">Ask anything — concepts, homework, tips, or motivation</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="clearAiChat()">Clear chat</button>
+    </div>
+    <div class="ai-chat-feed" id="aiChatFeed">
+      <div class="ai-welcome">
+        <div id="aiKeyBannerInChat"></div>
+        <div class="ai-welcome-icon">🤖</div>
+        <div class="ai-welcome-title">Hey there, I'm your AI Tutor!</div>
+        <div class="ai-welcome-sub">Ask me anything — concepts, homework help, study tips, or just to explain something tricky.</div>
+        <div class="ai-quick-btns">
+          <button onclick="quickAsk('Explain the Pomodoro technique to me')">⏱ Pomodoro tips</button>
+          <button onclick="quickAsk('How do I stay focused while studying?')">🎯 Focus tips</button>
+          <button onclick="quickAsk('Give me a quick quiz on any topic')">🧠 Quick quiz</button>
+          <button onclick="quickAsk('Motivate me to study!')">✨ Motivate me</button>
+        </div>
+      </div>
+    </div>
+    <div class="ai-chat-input-area">
+      <textarea class="ai-chat-textarea" id="aiChatInput" rows="1" placeholder="Ask your AI tutor anything…" onkeydown="aiChatEnter(event)" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ AI INSIGHTS PAGE ══════ -->
+<div class="page" id="page-aiinsights">
+  <div class="aiinsights-page">
+    <h1>✨ AI Study Insights</h1>
+    <p class="aiinsights-sub">Personalized analysis of your study habits, powered by AI.</p>
+    <!-- AI Study Plan (new feature) -->
+    <div style="background:linear-gradient(135deg,var(--pink3),var(--gold-dim));border:1.5px solid rgba(232,112,138,.2);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-weight:800;font-size:.88rem;color:var(--rose);margin-bottom:2px;">📋 Weekly Study Plan</div>
+        <div style="font-size:.73rem;color:var(--muted);line-height:1.4;">AI creates a personalized schedule based on your subjects.</div>
+      </div>
+      <button onclick="generateStudyPlan()" id="studyPlanBtn" style="background:var(--grad);color:white;border:none;border-radius:100px;padding:9px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(232,112,138,.3);transition:all .2s;flex-shrink:0;">📋 Generate Plan</button>
+    </div>
+    <div id="studyPlanOutput" style="display:none;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin-bottom:14px;"></div>
+    <button class="insights-gen-btn" id="insightsGenBtn" onclick="generateInsights()">✨ Analyze My Study Data</button>
+    <div id="insightsOutput"></div>
+  </div>
+</div>
+
+<!-- ══════ FLASHCARDS PAGE ══════ -->
+<div class="page" id="page-flashcards">
+  <div class="flashcards-page">
+    <!-- Deck List View -->
+    <div id="fcDeckView">
+      <h1>🃏 Flashcard Decks</h1>
+      <p class="fc-sub">Create decks manually or let AI generate them instantly.</p>
+      <div class="fc-ai-gen-row">
+        <input class="fc-ai-input" id="fcAiTopic" placeholder="Enter a topic (e.g. Photosynthesis, World War 2…)" onkeydown="if(event.key==='Enter')aiGenerateDeck()">
+        <button class="fc-action-btn primary" id="fcAiGenBtn" onclick="aiGenerateDeck()">✨ Generate with AI</button>
+      </div>
+      <div class="fc-top-actions">
+        <button class="fc-action-btn" onclick="openCreateDeck()">+ Create Deck Manually</button>
+      </div>
+      <div class="fc-deck-list" id="flashcardDeckList">
+        <div class="fc-empty">No decks yet — create one or generate with AI! 🃏</div>
+      </div>
+    </div>
+
+    <!-- Study View -->
+    <div id="fcStudyView" style="display:none">
+      <div class="fc-study-view">
+        <div class="fc-study-header">
+          <div class="fc-study-deck-name" id="fcStudyDeckName">Deck</div>
+          <div style="display:flex;gap:8px">
+            <button class="fc-nav-btn" onclick="shuffleCards()" style="padding:8px 14px">🔀</button>
+            <button class="fc-nav-btn" onclick="closeDeck()" style="padding:8px 14px">← Back</button>
+          </div>
+        </div>
+        <div class="fc-progress-row">
+          <div class="fc-progress-bar-bg"><div class="fc-progress-bar-fill" id="fcProgressBar" style="width:0%"></div></div>
+          <div class="fc-card-progress" id="fcCardProgress">1 / 1</div>
+        </div>
+        <div class="fc-card-wrap" onclick="flipCard()">
+          <div class="fc-card-inner" id="fcCardInner">
+            <div class="fc-card-face fc-card-front" id="fcCardFront">
+              <div class="fc-card-label">QUESTION</div>
+              <div class="fc-card-main-text">Loading…</div>
+            </div>
+            <div class="fc-card-face fc-card-back" id="fcCardBack">
+              <div class="fc-card-label answer-label">ANSWER</div>
+              <div class="fc-card-main-text">Loading…</div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:.72rem;color:var(--muted2);margin-bottom:16px">Tap card to flip</p>
+        <div class="fc-card-nav">
+          <button class="fc-nav-btn" onclick="prevCard()">← Prev</button>
+          <button class="fc-nav-btn flip-btn" onclick="flipCard()">Flip Card</button>
+          <button class="fc-nav-btn" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLASHCARD CREATE MODAL -->
+<div class="modal-backdrop hidden" id="fcCreateModal">
+  <div class="fc-create-modal">
+    <div class="fc-modal-title">📝 Create New Deck</div>
+    <div class="fc-modal-sub">Add your own cards using the Q | A format.</div>
+    <div class="fl"><label>Deck Name</label><input class="fi" id="fcNewDeckName" placeholder="e.g. Biology Chapter 5" maxlength="40"></div>
+    <div class="fc-format-hint">Format: One card per line<br>Question | Answer<br><br>Example:<br>What is photosynthesis? | Process plants use to convert light to food<br>Symbol for Carbon | C</div>
+    <div class="fl"><label>Cards (Q | A format)</label><textarea class="fi" id="fcNewDeckCards" rows="8" placeholder="What is the capital of France? | Paris&#10;H2O stands for? | Water" style="resize:vertical;border-radius:var(--r-sm)"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-primary" onclick="saveNewDeck()" style="flex:1;justify-content:center">Save Deck →</button>
+      <button class="btn btn-ghost" onclick="closeCreateDeck()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ QUIZ PAGE ══════ -->
+<div class="page" id="page-quiz">
+  <div class="quiz-page">
+    <h1>🧠 AI Quiz</h1>
+    <p class="quiz-sub">Test your knowledge with AI-generated quizzes on any topic.</p>
+
+    <!-- Setup -->
+    <div id="quizSetup">
+      <div class="quiz-setup-card">
+        <h2>Generate a Quiz</h2>
+        <div class="fl"><label>Topic</label><input class="fi" id="quizTopicInput" placeholder="e.g. French Revolution, Calculus, Organic Chemistry…" onkeydown="if(event.key==='Enter')generateQuiz()"></div>
+        <div class="quiz-setup-row">
+          <select class="quiz-select" id="quizDifficulty">
+            <option value="easy">🟢 Easy</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="hard">🔴 Hard</option>
+          </select>
+          <select class="quiz-select" id="quizCount">
+            <option value="5">5 questions</option>
+            <option value="8" selected>8 questions</option>
+            <option value="10">10 questions</option>
+          </select>
+        </div>
+        <button class="quiz-gen-btn" id="quizGenBtn" onclick="generateQuiz()">🚀 Start Quiz</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="quizLoading" style="display:none">
+      <div class="quiz-loading">
+        <div class="quiz-spinner"></div>
+        <p>AI is crafting your quiz…</p>
+      </div>
+    </div>
+
+    <!-- Game -->
+    <div id="quizGame" style="display:none">
+      <div class="quiz-game-header">
+        <span class="quiz-topic-tag" id="quizTopicDisplay">Topic</span>
+        <span class="quiz-qnum" id="quizQuestionNum">Question 1 of 8</span>
+      </div>
+      <div class="quiz-progress-bar-bg"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%"></div></div>
+      <div class="quiz-question-card">
+        <div class="quiz-question-text" id="quizQuestionText">Loading…</div>
+      </div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-explanation" id="quizExplanation">
+        <div class="quiz-explanation-label">💡 Explanation</div>
+        <div id="quizExplanationText"></div>
+      </div>
+      <button class="quiz-next-btn" id="quizNextBtn" onclick="nextQuizQuestion()" style="display:none">Next Question →</button>
+    </div>
+
+    <!-- Results -->
+    <div id="quizResults" style="display:none">
+      <div class="quiz-results">
+        <div class="quiz-result-icon" id="quizResultEmoji">🏆</div>
+        <div class="quiz-result-score" id="quizResultScore">0 / 0</div>
+        <div class="quiz-result-pct" id="quizResultPct">0%</div>
+        <div class="quiz-result-msg" id="quizResultMsg">Great work!</div>
+        <button class="quiz-retry-btn" onclick="resetQuiz()">Try Another Quiz →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MOBILE SCROLLABLE BOTTOM NAV
+     (swipe left/right to see all tabs)
+══════════════════════════════════════════ -->
+<nav class="mobile-bottom-nav" id="mobileBottomNav">
+  <button class="mob-nav-btn active" id="mob-goals"      onclick="switchTab('goals',this)">      <span class="mn-icon">📌</span>Goals</button>
+  <button class="mob-nav-btn"        id="mob-chat"       onclick="switchTab('chat',this)">       <span class="mn-icon">💬</span>Chat</button>
+  <button class="mob-nav-btn"        id="mob-tracker"    onclick="switchTab('tracker',this)">    <span class="mn-icon">📊</span>Tracker</button>
+  <button class="mob-nav-btn"        id="mob-pomodoro"   onclick="switchTab('pomodoro',this)">   <span class="mn-icon">🍅</span>Pomodoro</button>
+  <button class="mob-nav-btn"        id="mob-planner"    onclick="switchTab('planner',this)">    <span class="mn-icon">📅</span>Planner</button>
+  <button class="mob-nav-btn"        id="mob-missions"   onclick="switchTab('missions',this)">   <span class="mn-icon">⚡</span>Missions<span class="mob-nav-badge" id="mobMissionBadge">!</span></button>
+  <button class="mob-nav-btn"        id="mob-community"  onclick="switchTab('community',this)">  <span class="mn-icon">🏆</span>Leaders</button>
+  <button class="mob-nav-btn"        id="mob-report"     onclick="switchTab('report',this)">     <span class="mn-icon">📈</span>Report</button>
+  <button class="mob-nav-btn"        id="mob-rewards"    onclick="switchTab('rewards',this)">    <span class="mn-icon">🎖</span>Rewards</button>
+  <button class="mob-nav-btn"        id="mob-shop"       onclick="switchTab('shop',this)">       <span class="mn-icon">🍄</span>Shop</button>
+  <button class="mob-nav-btn"        id="mob-pet"        onclick="switchTab('pet',this)">        <span class="mn-icon">🐾</span>Pet</button>
+  <button class="mob-nav-btn"        id="mob-aichat"     onclick="switchTab('aichat',this)">     <span class="mn-icon">🤖</span>AI Tutor</button>
+  <button class="mob-nav-btn"        id="mob-aiinsights" onclick="switchTab('aiinsights',this)"> <span class="mn-icon">✨</span>Insights</button>
+  <button class="mob-nav-btn"        id="mob-flashcards" onclick="switchTab('flashcards',this)"> <span class="mn-icon">🃏</span>Cards</button>
+  <button class="mob-nav-btn"        id="mob-quiz"       onclick="switchTab('quiz',this)">       <span class="mn-icon">🧠</span>Quiz</button>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     ONCLICK BRIDGE
+     Modules are deferred — inline onclick="" calls
+     may fire before window.* assignments run.
+     This plain script polls until the module is ready
+     then re-wires every button via addEventListener.
+══════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════
+     ONCLICK BRIDGE — keeps inline for timing.
+     Polls until the module has set window.* then
+     rewires every onclick attribute via addEventListener.
+══════════════════════════════════════════ -->
+<script>
+(function() {
+  function tryBind() {
+    if (typeof window.toggleDark !== 'function' ||
+        typeof window.goToRoom   !== 'function') {
+      setTimeout(tryBind, 50);
+      return;
+    }
+    document.querySelectorAll('[onclick]').forEach(function(el) {
+      var raw = el.getAttribute('onclick');
+      if (!raw) return;
+      var m = raw.match(/^(\w+)\((.*)\)$/s);
+      if (!m) return;
+      var fnName = m[1];
+      var argsStr = m[2].trim();
+      if (typeof window[fnName] !== 'function') return;
+      el.removeAttribute('onclick');
+      el.addEventListener('click', function(e) {
+        try {
+          if (!argsStr) {
+            window[fnName].call(el);
+          } else {
+            var args = argsStr === 'this' ? [el]
+              : argsStr.split(',').map(function(a) {
+                  a = a.trim();
+                  if (a === 'this') return el;
+                  try { return JSON.parse(a); }
+                  catch(ex) { return a.replace(/^['"]|['"]$/g,''); }
+                });
+            window[fnName].apply(el, args);
+          }
+        } catch(err) { console.error('onclick bridge error ['+fnName+']:', err); }
+      });
+    });
+    // Also fix onkeydown on name inputs
+    ['nameInput2'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.removeAttribute('onkeydown');
+        el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') window.goToRoom && window.goToRoom();
+        });
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryBind);
+  } else {
+    tryBind();
+  }
+})();
+</script>
+</body>
+</html>
